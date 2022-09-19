@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OUW : POST LIST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /*background-color: #181818;*/
+        }
+
+        .main_section {
+            /*background-color: #E7E7E7;*/
+
+            width: 70%;
+            height: 100%;
+            min-width: 500px;
+            max-width: 930px;
+
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translate(-50%, 0px);
+        }
+
+        .postList_header {
+            width: 100%;
+            height: 50px;
+
+            position: relative;
+            top: 0;
+        }
+
+        .logo {
+            position: absolute;
+            top: 50%;
+            left: 30px;
+            transform: translate(0, -50%);
+
+            font-family: 'Gugi', cursive;
+            font-size: 30px;
+        }
+
+        .logo > img {
+            width: 30px;
+        }
+
+        .logo > span {
+            font-size: 20px;
+        }
+
+        .write_post{
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translate(-110%, -50%);
+            width: 30px;
+            height: 30px;
+            /*background-color: red;*/
+            background-image: url('https://cdn0.iconfinder.com/data/icons/font-awesome-solid-vol-2/576/edit-256.png');
+            background-size: cover;
+        }
+        .container {
+            /*Grid 방식*/
+            width: 100%;
+            max-width: 930px;
+            min-width: 455px;
+
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(32%, auto));
+            grid-auto-rows: minmax(150px, auto);
+            gap: 1px;
+
+        }
+
+        .item {
+            position: relative;
+            padding-top: 100%;
+        }
+
+        .thumb {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+
+            background-color: blue;
+            width: 100%;
+            height: 100%;
+
+            max-height: 280px;
+            max-width: 280px;
+
+            min-height: 150px;
+            min-width: 150px;
+        }
+
+        .thumb::after{
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .8);
+            z-index: 1;
+            opacity: 0;
+            transition: all .35s;
+        }
+
+        .thumb:hover::after{
+            opacity: 1;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+<div class="main_section">
+    <div class="postList_header">
+        <div class="logo">
+            <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png">OUW<span>오늘의 운동 완료</span>
+        </div>
+        <a href="newpost"><div class="write_post"></div></a>
+    </div>
+
+    <div class="container">
+        <div class="item">
+            <div class="thumb">
+            </div>
+        </div>
+        <div class="item">
+            <div class="thumb">NONAME2</div>
+        </div>
+        <div class="item">
+            <div class="thumb">NONAME3</div>
+        </div>
+        <div class="item">
+            <div class="thumb">NONAME4</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
