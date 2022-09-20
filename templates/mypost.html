@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>OUW : POST LIST</title>
+        <title>OUW : MY POST</title>
             <!-- Web Fonts -->
             <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
             <!-- Bulma CSS -->
@@ -110,6 +110,32 @@
             .fa {
                 color: white;
             }
+            .user-info {
+                background-color: #ffffff;
+                width: 100%;
+                height: 150px;
+
+                position: relative;
+                display: grid;
+                grid-template-columns: 150px auto;
+                grid-template-rows: 2fr 1fr;
+            }
+
+            .user-info > img {
+                width: 150px;
+                grid-column-start: 1;
+                grid-column-end: 2;
+                grid-row-start: 1;
+                grid-row-end: 3;
+            }
+            .user-info > span{
+                font-size: 20px;
+                margin: auto 15px 0;
+            }
+            .user-info > p {
+                font-size: 14px;
+                margin: 0 15px;
+            }
         </style>
         <script>
             <!-- DOCUMENT READY 함수 -->
@@ -193,7 +219,13 @@
                 <!-- END : 우측 메뉴 -->
             </div>
             <!-- END : HEADER -->
-
+            <!-- START : USER INFO -->
+            <div class="user-info" id="user_info">
+                <img src="https://cdn4.iconfinder.com/data/icons/music-ui-solid-24px/24/user_account_profile-2-256.png">
+                <span>ID 넣을곳</span>
+                <p>post 2 | like 2 | comment 10 </p>
+            </div>
+            <!-- END : USER INFO -->
             <!-- START : POST LIST -->
             <div class="container" id="post_list">
             </div>

@@ -85,10 +85,25 @@ def get_posts():
         posts = list(db.posts.find({}).sort("date", -1).limit(20))
         for post in posts:
             post["_id"] = str(post["_id"])
+            post["count_likes"] = db.likes.count_documents({"postid": post["_id"]})
+            post["count_comments"] = db.comments.count_documents({"postid": post["_id"]})
         return jsonify({"result": "success", "msg": "포스팅을 가져왔습니다.", "posts": posts})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
-#
+
+@app.route('/mypost/<username>')
+def mypost(username):
+    # 각 사용자의 프로필과 글을 모아볼 수 있는 공간
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        status = (username == payload["id"])  # 내 프로필이면 True, 다른 사람 프로필 페이지면 False
+
+        user_info = db.users.find_one({"username": username}, {"_id": False})
+        return render_template('mypost.html', user_info=user_info, status=status)
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
+
 @app.route("/post/<postid>", methods=['GET'])
 def get_post(postid):
     print(postid);
@@ -128,7 +143,6 @@ def new_post():
 #         return jsonify({"result": "success", 'msg': 'updated'})
 #     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
 #         return redirect(url_for("home"))
-
 # @app.route('/user/<username>')
 # def user(username):
 #     # 각 사용자의 프로필과 글을 모아볼 수 있는 공간
@@ -141,7 +155,6 @@ def new_post():
 #         return render_template('user.html', user_info=user_info, status=status)
 #     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
 #         return redirect(url_for("home"))
-
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
