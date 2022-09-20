@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>OUW : MY POST</title>
+            <!-- Web Fonts -->
+            <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+            <!-- Bulma CSS -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+            <!-- Font Awesome CSS -->
+            <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+            <!-- Static CSS -->
+            <link href="../static/main.css" rel="stylesheet">
+            <!-- JS -->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+        <style>
+            /* POST LIST : GRID CONTAINER */
+            .container {
+                width: 100%;
+                max-width: 930px;
+                min-width: 455px;
+
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(32%, auto));
+                grid-auto-rows: minmax(150px, auto);
+                gap: 1px;
+            }
+
+            /* POST LIST : GRID ITEM */
+            .item {
+                position: relative;
+                padding-top: 100%;
+            }
+
+            /* POST LIST : ITEM 내 POST IMAGE 썸네일 표시를 위한 CLASS */
+            .thumb {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+
+                width: 100%;
+                height: 100%;
+
+                max-height: 280px;
+                max-width: 280px;
+
+                min-height: 150px;
+                min-width: 150px;
+            }
+
+            /* 썸네일 MOUSE OVER 시 어둡게 표시하기 */
+            /* 넣어야 할 내용들이 생겨서 After 빼고 div 추가*/
+            /* .thumb::after{
+                content: '';
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, .8);
+                z-index: 1;
+                opacity: 0;
+                transition: all .35s;
+            }
+
+            .thumb:hover::after{
+                opacity: 1;
+            }
+            */
+            .thumb-info {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, .8);
+                z-index: 1;
+                opacity: 0;
+                transition: all .35s;
+
+            }
+            .thumb-info > span{
+                margin-right: 5px;
+                margin-left: 5px;
+            }
+            .thumb-info:hover{
+                opacity: 1;
+            }
+            /* 썸네일 이미지 사이즈 */
+            .thumb > img{
+                width: 100%;
+                height:100%;
+                object-fit: cover;
+            }
+            .num-count {
+                font-size: 14px;
+                font-weight: bold;
+                color: white;
+            }
+
+            .fa {
+                color: white;
+            }
+            .user-info {
+                background-color: #ffffff;
+                width: 100%;
+                height: 150px;
+
+                position: relative;
+                display: grid;
+                grid-template-columns: 150px auto;
+                grid-template-rows: 2fr 1fr;
+            }
+
+            .user-info > img {
+                width: 150px;
+                grid-column-start: 1;
+                grid-column-end: 2;
+                grid-row-start: 1;
+                grid-row-end: 3;
+            }
+            .user-info > span{
+                font-size: 20px;
+                margin: auto 15px 0;
+            }
+            .user-info > p {
+                font-size: 14px;
+                margin: 0 15px;
+            }
+        </style>
+        <script>
+            <!-- DOCUMENT READY 함수 -->
+            $(document).ready(function () {
+                get_posts()
+            })
+
+            // START : 서버에서 posts 받아와 표시
+            function get_posts() {
+                $("#get_posts").empty()
+                $.ajax({
+                    type: "GET",
+                    url: "/get_posts",
+                    data: {},
+                    success: function (response) {
+                        if (response["result"] == "success") {
+                            let posts = response["posts"]
+                            for (let i = 0; i < posts.length; i++) {
+                                let post = posts[i]
+                                let img = post['img']
+                                let postid = post['_id']
+                                let countlikes = post['count_likes']
+                                let countcomments = post['count_comments']
+                                // let time_post = new Date(post["date"])
+                                // let time_before = time2str(time_post)
+                                console.log(postid)
+                                let html_temp = `<div class="item">
+                                                      <a href="post/${postid}">
+                                                        <div class="thumb">
+                                                            <img src="/static/img_post/${img}">
+                                                            <div class="thumb-info">
+                                                                <span class="icon is-small"><i class="fa fa-light fa-heart" aria-hidden="true"></i></span>
+                                                                <span class="num-count">${countlikes}</span>
+                                                                <span class="num-count"> </span>
+                                                                <span class="icon is-small"><i class="fa fa-regular fa-comment" aria-hidden="true"></i></span>
+                                                                <span class="num-count">${countcomments}</span>
+                                                            </div>
+                                                        </div></a>
+                                                 </div>`
+                                $("#post_list").append(html_temp)
+                            }
+                        }
+                    }
+                })
+            }
+            // END : 서버에서 posts 받아와서 표시
+
+            function logout(){
+                $.removeCookie('mytoken')
+                window.location.href="/"
+
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="main_section">
+
+            <!-- START : HEADER -->
+            <div class="postList_header">
+                <!-- START : LOGO -->
+                <a href="/">
+                    <div class="logo">
+                        <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
+                             alt="logo">OUW
+                        <span>오늘의 운동 완료</span>
+                    </div>
+                </a>
+                <!-- END : LOGO -->
+                <!-- START : 우측 메뉴 -->
+                <div class="mymenu">
+                    <a href="newpost">write</a>
+                    <div class="dropdown">
+                        <a>{{ user_info.username }}</a>
+                        <div class="dropdown-content">
+                            <a href="/mypost/{{ user_info.username }}">my post</a>
+                            <a href="#" onclick="logout()">logout</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- END : 우측 메뉴 -->
+            </div>
+            <!-- END : HEADER -->
+            <!-- START : USER INFO -->
+            <div class="user-info" id="user_info">
+                <img src="https://cdn4.iconfinder.com/data/icons/music-ui-solid-24px/24/user_account_profile-2-256.png">
+                <span>ID 넣을곳</span>
+                <p>post 2 | like 2 | comment 10 </p>
+            </div>
+            <!-- END : USER INFO -->
+            <!-- START : POST LIST -->
+            <div class="container" id="post_list">
+            </div>
+            <!-- END : POST LIST -->
+        </div>
+    </body>
+</html>
