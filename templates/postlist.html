@@ -3,63 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>OUW : POST LIST</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+        <!-- Web Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+        <!-- Static CSS -->
+        <link href="../static/main.css" rel="stylesheet">
+        <!-- JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
     <style>
-        body {
-            /*background-color: #181818;*/
-        }
-
-        .main_section {
-            /*background-color: #E7E7E7;*/
-
-            width: 70%;
-            height: 100%;
-            min-width: 500px;
-            max-width: 930px;
-
-            position: absolute;
-            left: 50%;
-            top: 0;
-            transform: translate(-50%, 0px);
-        }
-
-        .postList_header {
-            width: 100%;
-            height: 50px;
-
-            position: relative;
-            top: 0;
-        }
-
-        .logo {
-            position: absolute;
-            top: 50%;
-            left: 30px;
-            transform: translate(0, -50%);
-
-            font-family: 'Gugi', cursive;
-            font-size: 30px;
-        }
-
-        .logo > img {
-            width: 30px;
-        }
-
-        .logo > span {
-            font-size: 20px;
-        }
-
-        .write_post{
-            position: absolute;
-            top: 50%;
-            left: 100%;
-            transform: translate(-110%, -50%);
-            width: 30px;
-            height: 30px;
-            /*background-color: red;*/
-            background-image: url('https://cdn0.iconfinder.com/data/icons/font-awesome-solid-vol-2/576/edit-256.png');
-            background-size: cover;
-        }
         .container {
             /*Grid 방식*/
             width: 100%;
@@ -113,34 +65,68 @@
             opacity: 1;
         }
 
-
+        .thumb > img{
+            width: 100%;
+            height:100%;
+            object-fit: cover;
+        }
 
     </style>
+    <script>
+        <!-- DOCUMENT READY 함수 -->
+        $(document).ready(function () {
+            get_posts()
+        })
+
+        function get_posts() {
+            $("#get_posts").empty()
+            $.ajax({
+                type: "GET",
+                url: "/get_posts",
+                data: {},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        let posts = response["posts"]
+                        for (let i = 0; i < posts.length; i++) {
+                            let post = posts[i]
+                            let img = post['img']
+                            let postid = post['_id']
+                            // let time_post = new Date(post["date"])
+                            // let time_before = time2str(time_post)
+                            console.log(postid)
+                            let html_temp = `<div class="item">
+                                                  <a href="post/${postid}"><div class="thumb"><img src="/static/img_post/${img}"></div></a>
+                                             </div>`
+                            $("#post_list").append(html_temp)
+                        }
+                    }
+                }
+            })
+        }
+
+        function logout(){
+            $.removeCookie('mytoken')
+            window.location.href="/"
+        }
+    </script>
 </head>
 
 <body>
 <div class="main_section">
+
+    <!-- START : HEADER -->
     <div class="postList_header">
         <div class="logo">
-            <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png">OUW<span>오늘의 운동 완료</span>
+            <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png" alt="logo">OUW
+            <span>오늘의 운동 완료</span>
         </div>
-        <a href="newpost"><div class="write_post"></div></a>
-    </div>
 
-    <div class="container">
-        <div class="item">
-            <div class="thumb">
-            </div>
-        </div>
-        <div class="item">
-            <div class="thumb">NONAME2</div>
-        </div>
-        <div class="item">
-            <div class="thumb">NONAME3</div>
-        </div>
-        <div class="item">
-            <div class="thumb">NONAME4</div>
-        </div>
+        <a href="newpost"><div class="menu write">write</div></a>
+        <a href="#" onclick="logout()"><div class="menu logout">logout</div></a>
+    </div>
+    <!-- END : HEADER -->
+
+    <div class="container" id="post_list">
     </div>
 </div>
 </body>
