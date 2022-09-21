@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OUW : MY POST</title>
+    <title>OUW : {{ user_info.username }} POST</title>
     <!-- Web Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
     <!-- Bulma CSS -->
@@ -229,7 +229,6 @@
         function logout() {
             $.removeCookie('mytoken')
             window.location.href = "/"
-
         }
 
         function update_profile() {

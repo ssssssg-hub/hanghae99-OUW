@@ -5,7 +5,9 @@ import hashlib
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+import certifi
 
+ca = certifi.where()
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -14,10 +16,8 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 SECRET_KEY = 'PROJECTOUW'
 
 # AWS 업로드해야 localhost로 작동한다.
-# client = MongoClient('13.209.15.57', 27017, username="test", password="test")
-client = MongoClient('localhost', 27017, username="test", password="test")
-
-
+# client = MongoClient('localhost', 27017, username="test", password="test")
+client = MongoClient('13.209.15.57', 27017, username="test", password="test")
 db = client.project_ouw
 
 @app.route('/')
@@ -31,6 +31,21 @@ def home():
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+@app.route("/postlist")
+def postlist():
+    # Cookie로부터 token을 받아온다.
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # token 복호화 후 DB로부터 user 정보를 가져온다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.users.find_one({"username": payload["id"]})
+        return render_template('postlist.html', user_info=user_info)
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
+        return render_template('postlist.html', user_info='')
 
 # UPDATE PROFILE
 @app.route('/update_profile', methods=['POST'])
@@ -80,8 +95,8 @@ def sign_in():
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
         return jsonify({'result': 'success', 'token': token})
     # 찾지 못하면
@@ -111,25 +126,32 @@ def check_dup():
 
 @app.route("/get_posts", methods=['GET'])
 def get_posts():
+    # cookie에서 token을 받아온다.
     token_receive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        # username이 전달되었는지 여부를 확인한다.
         username_receive = request.args.get("username_give")
-
         isTotal = username_receive == None;
-
+        
+        # username이 전달되지 않았다면
         if isTotal:
+            # DB 내 모든 post를 가져온다.
             posts = list(db.posts.find({}).sort("date", -1))
-            print(posts)
+        # username이 전달되었다면
         else:
+            # DB 내 해당 user의 post만 가져온다.
             posts = list(db.posts.find({"user": username_receive}).sort("date", -1))
+            # User 소개 정보를 Client에 전달하기 위해 dict 변수를 만든다.
             user_post_info = {
-                'count_posts':0,
-                'count_likes':0,
+                'count_posts': 0,
+                'count_likes': 0,
                 'count_comments': 0,
             };
 
+        # 가져온 post DB 전체 반복
         for post in posts:
+            # post _id
             post["_id"] = str(post["_id"])
             post["count_likes"] = db.likes.count_documents({"postid": post["_id"]})
             post["count_comments"] = db.comments.count_documents({"postid": post["_id"]})
@@ -153,7 +175,6 @@ def mypost(username):
     token_receive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        print(payload['id'])
         status = (username == payload["id"])  # 내 프로필이면 True, 다른 사람 프로필 페이지면 False
         user_info = db.users.find_one({"username": username}, {"_id": False})
         return render_template('mypost.html', username=payload['id'], user_info=user_info, status=status)
@@ -162,13 +183,66 @@ def mypost(username):
 
 @app.route("/post/<postid>", methods=['GET'])
 def get_post(postid):
-    print(postid)
+    print(postid);
     return redirect(url_for("home"))
 
 @app.route("/newpost")
 def new_post():
-    print('new_post 실행!')
-    return redirect(url_for("home"))
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # token 복호화 후 DB로부터 user 정보를 가져온다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        return render_template('newpost.html', username=payload["id"])
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
+        return redirect(url_for("login", msg="로그인 해주세요."))
+
+# @app.route('/newpost', methods=['GET'])
+# def show_newpost():
+#     newposts = list(db.diary.find({}, {'_id': False}))
+#     return jsonify({'all_newpost':newposts})
+
+@app.route('/newpost', methods=['POST'])
+def save_newpost():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # token 복호화 후 DB로부터 user 정보를 가져온다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.users.find_one({"username": payload["id"]})
+
+        # title_receive = request.form['title_give'] 타이틀대신 주소
+        content_receive = request.form['content_give']
+
+        file = request.files["file_give"]
+
+        extension = file.filename.split('.')[-1]
+
+        today = datetime.now()
+        mytime = today.strftime('%Y-%m-%d-%H-%M-%S')
+
+        filename = f'file-{mytime}'
+
+        save_to = f'static/img_post/{filename}.{extension}'
+        file.save(save_to)
+
+        doc = {
+            # 'title':title_receive, 타이틀대신 주소
+            'user': user_info['username'],
+            'content': content_receive,
+            'img': f'{filename}.{extension}',
+            'date': today.strftime('%Y.%m.%d')
+        }
+
+        db.posts.insert_one(doc)
+
+        return jsonify({'msg': '저장 완료!'})
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
+        return redirect(url_for("login", msg="로그인 해주세요."))
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

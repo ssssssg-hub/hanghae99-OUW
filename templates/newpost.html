@@ -1,10 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>새로운 글 작성</title>
+    <link href="../static/main.css" rel="stylesheet">
+    <!-- Web Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <script type="text/javascript"
+            src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=6ck56pnwef"></script>
+    <script src=" https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-    </body>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap');
+    </style>
+    <style>
+        .main-box {
+            position: relative;
+            width: 80%;
+            margin: auto;
+            text-align: left;
+        }
+
+        #map {
+            width: 100%;
+            height: 200px;
+        }
+
+        .map-box {
+            height: 100%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .file-box {
+            margin-top: 30px;
+
+        }
+
+        .text-box {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .textarea {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+        }
+
+        .btn {
+            height: 50px;
+            width: 80px;
+            font-size: inherit;
+            border-radius: 10px;
+            border-color: white;
+            background-color: whitesmoke;
+            text-align: center;
+            padding: inherit;
+            float: right;
+            margin-right: 0;
+
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            let map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(37.4981125, 127.0379399),
+                zoom: 10,
+                zoomControl: true,
+                zoomControlOptions: {
+                    style: naver.maps.ZoomControlStyle.SMALL,
+                    position: naver.maps.Position.TOP_RIGHT
+                }
+            });
+
+            function onGeoOkay(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                let marker = new naver.maps.Marker({
+                    position: new naver.maps.LatLng(lat, lng),
+                    map: map,
+                });
+                map.setCenter(new naver.maps.LatLng(lat, lng))
+            }
+
+            function onGeoError() {
+                alert("I can't find you.");
+            }
+
+            navigator.geolocation.getCurrentPosition(onGeoOkay, onGeoError);
+        })
+
+
+        function listing() {
+            $.ajax({
+                type: "GET",
+                url: "/newpost",
+                data: {},
+                success: function (response) {
+                    let newposts = response['all_newpost']
+                    for (let i = 0; i < newposts.length; i++) {
+                        {#let title = newposts[i]['title'] 타이틀 대신 주소#}
+                        let content = newposts[i]['content']
+                        let file = newposts[i]['file']
+                        let time = newposts[i]['time']
+                        {#이부분 수정해야함#}
+                        let temp_html = `<div class="card">
+                                            <img src="../static/${file}" class="card-img-top">
+                                            <div class="card-body">
+{#                                                <h5 class="card-title">${title}</h5> 타이틀대신 주소#}
+                                                <p class="card-text">${content}</p>
+                                                <p class="save-date">${time}</p>
+                                            </div>
+                                        </div>`
+                        $('#cards-box').append(temp_html)
+
+                    }
+                }
+            })
+        }
+
+        function posting() {
+            let title = $('#title').val()
+            let content = $("#content").val()
+
+            let file = $('#file')[0].files[0]
+            let form_data = new FormData()
+
+            form_data.append("file_give", file)
+            {#form_data.append("title_give", title)타이틀 대신 주소#}
+            form_data.append("content_give", content)
+
+            $.ajax({
+                type: "POST",
+                url: "/newpost",
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response["msg"])
+                    // window.location.reload()
+                    window.location.href = "/mypost/{{ username }}"
+                }
+            });
+        }
+
+    </script>
+</head>
+
+<body>
+<div class="main_section">
+
+    <!-- START : HEADER -->
+    <div class="postList_header">
+        <!-- START : LOGO -->
+        <a href="/">
+            <div class="logo">
+                <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
+                     alt="logo">OUW
+                <span>오늘의 운동 완료</span>
+            </div>
+        </a>
+        <!-- END : LOGO -->
+        <!-- START : 우측 메뉴 -->
+        <div class="mymenu">
+            <!-- 로그인 여부에 따라 다른 메뉴 출력-->
+            {% if username == '' %}
+                <a href="/login">login</a>
+            {% else %}
+                <a href="/newpost">write</a>
+                <div class="dropdown">
+                    <a>{{ username }}</a>
+                    <div class="dropdown-content">
+                        <a href="mypost/{{ username }}">my post</a>
+                        <a href="#" onclick="logout()">logout</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <!-- END : 우측 메뉴 -->
+    </div>
+    <!-- END : HEADER -->
+
+    <div class="main-box">
+        <div class="map-box">
+            <h2 id="map-title">위치</h2>
+            <div id="map">
+            </div>
+        </div>
+
+        <div class="file-box">
+            <input type="file" class="custom-file-input" id="file">
+            <label class="custom-file-label" for="file">사진 선택하기</label>
+        </div>
+
+        <div class="text-box">
+            <textarea class="textarea" id="content" placeholder="오늘의 운동 완료 코멘트를 입력하세요" rows="10"></textarea>
+        </div>
+
+        <button onclick="posting()" type="button" class="btn">완료</button>
+
+        <div class="card-columns" id="cards-box">
+        </div>
+    </div>
+</div>
+</body>
 </html>
