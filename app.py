@@ -13,9 +13,12 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = 'PROJECTOUW'
 
-client = MongoClient('mongodb+srv://test:sparta@cluster0.yy37pvk.mongodb.net/cluster0?retryWrites=true&w=majority')
-db = client.project_ouw
+# AWS 업로드해야 localhost로 작동한다.
+# client = MongoClient('13.209.15.57', 27017, username="test", password="test")
+client = MongoClient('localhost', 27017, username="test", password="test")
 
+
+db = client.project_ouw
 
 @app.route('/')
 def home():
@@ -49,7 +52,8 @@ def sign_in():
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
         return jsonify({'result': 'success', 'token': token})
     # 찾지 못하면
@@ -82,12 +86,36 @@ def get_posts():
     token_receive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        posts = list(db.posts.find({}).sort("date", -1).limit(20))
+        username_receive = request.args.get("username_give")
+
+        isTotal = username_receive == None;
+
+        if isTotal:
+            posts = list(db.posts.find({}).sort("date", -1))
+            print(posts)
+        else:
+            posts = list(db.posts.find({"user": username_receive}).sort("date", -1))
+            user_post_info = {
+                'count_posts':0,
+                'count_likes':0,
+                'count_comments': 0,
+            };
+
         for post in posts:
             post["_id"] = str(post["_id"])
             post["count_likes"] = db.likes.count_documents({"postid": post["_id"]})
             post["count_comments"] = db.comments.count_documents({"postid": post["_id"]})
-        return jsonify({"result": "success", "msg": "포스팅을 가져왔습니다.", "posts": posts})
+            
+            if not isTotal:
+                user_post_info['count_posts'] += 1
+                user_post_info['count_likes'] += int(post["count_likes"])
+                user_post_info['count_comments'] += int(post["count_comments"])
+                print(user_post_info)
+
+        if isTotal:
+            return jsonify({"result": "success", "msg": "포스팅을 가져왔습니다.", "posts": posts})
+        else:
+            return jsonify({"result": "success", "msg": "포스팅을 가져왔습니다.", "posts": posts, 'user_post_info':user_post_info})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
 
@@ -106,55 +134,13 @@ def mypost(username):
 
 @app.route("/post/<postid>", methods=['GET'])
 def get_post(postid):
-    print(postid);
+    print(postid)
     return redirect(url_for("home"))
 
 @app.route("/newpost")
 def new_post():
     print('new_post 실행!')
     return redirect(url_for("home"))
-
-# @app.route('/update_profile', methods=['POST'])
-# def save_img():
-#     token_receive = request.cookies.get('mytoken')
-#     try:
-#         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-#         # 프로필 업데이트
-#         return jsonify({"result": "success", 'msg': '프로필을 업데이트했습니다.'})
-#     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-#         return redirect(url_for("home"))
-#
-# @app.route('/posting', methods=['POST'])
-# def posting():
-#     token_receive = request.cookies.get('mytoken')
-#     try:
-#         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-#         # 포스팅하기
-#         return jsonify({"result": "success", 'msg': '포스팅 성공'})
-#     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-#         return redirect(url_for("home"))
-#
-# @app.route('/update_like', methods=['POST'])
-# def update_like():
-#     token_receive = request.cookies.get('mytoken')
-#     try:
-#         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-#         # 좋아요 수 변경
-#         return jsonify({"result": "success", 'msg': 'updated'})
-#     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-#         return redirect(url_for("home"))
-# @app.route('/user/<username>')
-# def user(username):
-#     # 각 사용자의 프로필과 글을 모아볼 수 있는 공간
-#     token_receive = request.cookies.get('mytoken')
-#     try:
-#         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-#         status = (username == payload["id"])  # 내 프로필이면 True, 다른 사람 프로필 페이지면 False
-#
-#         user_info = db.users.find_one({"username": username}, {"_id": False})
-#         return render_template('user.html', user_info=user_info, status=status)
-#     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-#         return redirect(url_for("home"))
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

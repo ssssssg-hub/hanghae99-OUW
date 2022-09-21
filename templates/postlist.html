@@ -115,6 +115,7 @@
             <!-- DOCUMENT READY 함수 -->
             $(document).ready(function () {
                 get_posts()
+                console.log('postlist ready')
             })
 
             // START : 서버에서 posts 받아와 표시
@@ -181,11 +182,11 @@
                 <!-- END : LOGO -->
                 <!-- START : 우측 메뉴 -->
                 <div class="mymenu">
-                    <a href="newpost">write</a>
+                    <a href="/newpost">write</a>
                     <div class="dropdown">
                         <a>{{ user_info.username }}</a>
                         <div class="dropdown-content">
-                            <a href="/mypost/{{ user_info.username }}">my post</a>
+                            <a href="mypost/{{ user_info.username }}">my post</a>
                             <a href="#" onclick="logout()">logout</a>
                         </div>
                     </div>
