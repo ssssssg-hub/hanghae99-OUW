@@ -3,7 +3,7 @@
     <head>
 
         <!-- Webpage Title -->
-        <title>Home | OUW</title>
+        <title>DETAIL | OUW</title>
 
         <!-- Required meta tags -->
         <meta charset="utf-8">
@@ -32,47 +32,9 @@
 
         <script>
             $(document).ready(function () {
-                detail_get()
+                console.log('일단 들어왔다.')
             })
 
-            function detail_get() {
-                $("#detail").empty()
-                $.ajax({
-                    type: "GET",
-                    url: `/detail`,
-                    data: {},
-                    success: function (response) {
-                        if (response["result"] == "success") {
-                            let posts = response["postid"]
-                            for (let i = 0; i < posts.length; i++) {
-                                let post = posts[i]
-
-                                let html_temp = `<div class="control">
-                                                        <div class="nomal">
-                                                            <p class="card-text">작성자 : ${post['username']}</p>
-                                                            <p class="card-text">날짜 : $post{['date']}</p>
-                                                        </div>
-                                                        <p class="card-text">지도 : ${post['map']}</p>
-                                                        <img src="$post['img']">
-                                                        <div class="card-body">
-                                <!--                            <nav class="level is-mobile">-->
-                                <!--                                <div class="level-left">-->
-                                <!--                                    <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like('', 'heart')">-->
-                                <!--                                        <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span>&nbsp;<span-->
-                                <!--                                            class="like-num">2.7k</span>-->
-                                <!--                                    </a>-->
-                                <!--                                </div>-->
-                                <!--                            </nav>-->
-                                                            <p class="card-text">내용 : ${post['content']}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>`
-                                $("#detail").append(html_temp)
-                            }
-                        }
-                    }
-                })
-            }
             // function comment(){
             //     $.ajax({
             //         type: "POST",
@@ -115,26 +77,51 @@
                 <div class="logo">
                     <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
                          alt="logo">OUW
-                    <span>오늘의 운동 완료</span>
+                    <span>오늘의 운동</span>
+                    <a href="/">
+                        <span>back</span>
+                    </a>
                 </div>
                 <!--                home으로 넘어감-->
-                <a href="/">
-                    <div class="menu back">back</div>
-                </a>
+
             </div>
-<!--            모달을 쓰자면-->
-<!--            <div class="modal">-->
-<!--                <div class="modal-background"></div>-->
-<!--                <div class="modal-content">-->
-<!--                    <p class="image is-4by3">-->
-<!--                        <img src="{{ url_for('static', filename=user_info.img_post) }}">-->
-<!--                    </p>-->
-<!--                </div>-->
-<!--                <button class="modal-close is-large" aria-label="close"></button>-->
-<!--            </div>-->
-            <div class="detail">
+            <div class="box">
+                <figure class="image is-7600x7600">
+                    <!--                        <img src="{{ post['image'] }}" class="img-fluid">-->
+                    <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+                </figure>
             </div>
-        </div>
+            <nav class="level is-mobile">
+                <div class="level-left">
+                    <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like('', 'heart')">
+                        <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span>&nbsp;<span class="like-num">2.7k</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="control">
+                <div class="content">
+                    <p>
+                        <strong>{{ post['user'] }}</strong>
+                        <small>{{ post['date'] }}</small>
+                        <br>
+                    </p>
+                </div>
+                <div>
+                    {{ post['content'] }}
+                </div>
+                <div class="nomal">
+
+                </div>
+
+                <div class="card-body">
+
+
+                </div>
+            </div>
+
+
+
+<!--        </div>-->
             <!--댓글-->
             <!--                <div class="field is-grouped">-->
             <!--                    <div class="control is-expanded">-->
@@ -165,6 +152,6 @@
             <!-- 전송 버튼 -->
 
             <!--        </div>-->
-
+        </div>
     </body>
 </html>
