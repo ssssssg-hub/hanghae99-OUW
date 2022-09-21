@@ -176,7 +176,6 @@
         <!-- DOCUMENT READY 함수 -->
         $(document).ready(function () {
             get_posts('{{ user_info.username }}')
-            console.log(document.cookie)
         })
 
         // START : 서버에서 posts 받아와 표시
@@ -226,11 +225,6 @@
 
         // END : 서버에서 posts 받아와서 표시
 
-        function logout() {
-            $.removeCookie('mytoken')
-            window.location.href = "/"
-        }
-
         function update_profile() {
             // 파일을 폼 데이터에 넣는다.
             let file = $('#input-img')[0].files[0]
@@ -252,6 +246,13 @@
                     }
                 }
             });
+        }
+
+        function logout() {
+            console.log('삭제?')
+            $.removeCookie("mytoken", {path: "/"});
+
+            window.location.reload()
         }
     </script>
 </head>
@@ -315,14 +316,19 @@
         <!-- END : LOGO -->
         <!-- START : 우측 메뉴 -->
         <div class="mymenu">
-            <a href="/newpost">write</a>
-            <div class="dropdown">
-                <a>{{ username }}</a>
-                <div class="dropdown-content">
-                    <a href="/mypost/{{ username }}">my post</a>
-                    <a href="#" onclick="logout()">logout</a>
+            <!-- 로그인 여부에 따라 다른 메뉴 출력-->
+            {% if username == '' %}
+                <a href="/login">login</a>
+            {% else %}
+                <a href="/newpost">write</a>
+                <div class="dropdown">
+                    <a>{{ username }}</a>
+                    <div class="dropdown-content">
+                        <a href="/mypost/{{ username }}">my post</a>
+                        <a href="#" onclick="logout()">logout</a>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
         <!-- END : 우측 메뉴 -->
     </div>

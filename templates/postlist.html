@@ -114,12 +114,10 @@
             <!-- DOCUMENT READY 함수 -->
             $(document).ready(function () {
                 get_posts()
-                console.log('postlist ready')
             })
 
             // START : 서버에서 posts 받아와 표시
             function get_posts() {
-                console.log('postlist에서 get_posts 실행')
                 $("#get_posts").empty()
                 $.ajax({
                     type: "GET",
@@ -161,15 +159,12 @@
 
             function logout(){
                 $.removeCookie('mytoken')
-                window.location.href="/postlist"
-                // window.location.reload()
+                window.location.reload()
             }
         </script>
     </head>
-
     <body>
         <div class="main_section">
-
             <!-- START : HEADER -->
             <div class="postList_header">
                 <!-- START : LOGO -->
@@ -184,14 +179,14 @@
                 <!-- START : 우측 메뉴 -->
                 <div class="mymenu">
                     <!-- 로그인 여부에 따라 다른 메뉴 출력-->
-                    {% if user_info == '' %}
+                    {% if username == '' %}
                         <a href="/login">login</a>
                     {% else %}
                         <a href="/newpost">write</a>
                         <div class="dropdown">
-                            <a>{{ user_info.username }}</a>
+                            <a>{{ username }}</a>
                             <div class="dropdown-content">
-                                <a href="mypost/{{ user_info.username }}">my post</a>
+                                <a href="/mypost/{{ username }}">my post</a>
                                 <a href="#" onclick="logout()">logout</a>
                             </div>
                         </div>

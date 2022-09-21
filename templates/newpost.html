@@ -145,6 +145,7 @@
                     alert(response["msg"])
                     // window.location.reload()
                     window.location.href = "/mypost/{{ username }}"
+                    // localhost:5000/mypost/hana1234
                 }
             });
         }
@@ -155,36 +156,36 @@
 <body>
 <div class="main_section">
 
-    <!-- START : HEADER -->
-    <div class="postList_header">
-        <!-- START : LOGO -->
-        <a href="/">
-            <div class="logo">
-                <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
-                     alt="logo">OUW
-                <span>오늘의 운동 완료</span>
-            </div>
-        </a>
-        <!-- END : LOGO -->
-        <!-- START : 우측 메뉴 -->
-        <div class="mymenu">
-            <!-- 로그인 여부에 따라 다른 메뉴 출력-->
-            {% if username == '' %}
-                <a href="/login">login</a>
-            {% else %}
-                <a href="/newpost">write</a>
-                <div class="dropdown">
-                    <a>{{ username }}</a>
-                    <div class="dropdown-content">
-                        <a href="mypost/{{ username }}">my post</a>
-                        <a href="#" onclick="logout()">logout</a>
+            <!-- START : HEADER -->
+            <div class="postList_header">
+                <!-- START : LOGO -->
+                <a href="/">
+                    <div class="logo">
+                        <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
+                             alt="logo">OUW
+                        <span>오늘의 운동 완료</span>
                     </div>
+                </a>
+                <!-- END : LOGO -->
+                <!-- START : 우측 메뉴 -->
+                <div class="mymenu">
+                    <!-- 로그인 여부에 따라 다른 메뉴 출력-->
+                    {% if username == '' %}
+                        <a href="/login">login</a>
+                    {% else %}
+                        <a href="/newpost">write</a>
+                        <div class="dropdown">
+                            <a>{{ username }}</a>
+                            <div class="dropdown-content">
+                                <a href="/mypost/{{ username }}">my post</a>
+                                <a href="#" onclick="logout()">logout</a>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-        </div>
-        <!-- END : 우측 메뉴 -->
-    </div>
-    <!-- END : HEADER -->
+                <!-- END : 우측 메뉴 -->
+            </div>
+            <!-- END : HEADER -->
 
     <div class="main-box">
         <div class="map-box">
