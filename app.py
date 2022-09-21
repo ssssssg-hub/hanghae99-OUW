@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import certifi
 
+from bson.objectid import ObjectId
+
 ca = certifi.where()
 
 app = Flask(__name__)
@@ -240,7 +242,7 @@ def save_newpost():
             'user': user_info['username'],
             'content': content_receive,
             'img': f'{filename}.{extension}',
-            'date': today.strftime('%Y.%m.%d')
+            'date': today.strftime('%Y년%m월%d일 %H시%M분%S초')
         }
 
         db.posts.insert_one(doc)
@@ -251,6 +253,16 @@ def save_newpost():
     except jwt.exceptions.DecodeError:
         # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
         return redirect(url_for("login", msg="로그인 해주세요."))
+
+@app.route("/detail/<postid>", methods=['GET'])
+def detail_post(postid):
+    print(postid)
+    token_receive = request.cookies.get('mytoken')
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+    post = db.posts.find_one({"_id": ObjectId(postid)})
+    print(post)
+    return render_template('detail.html', username=payload["id"], post=post)
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
