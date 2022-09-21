@@ -32,6 +32,34 @@ def home():
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
+# UPDATE PROFILE
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    # Cookies에서 Token을 받아온다.
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # Token 정보 복호화 후 ID를 저장한다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        username = payload["id"]
+        # Client로부터 파일을 받았을 때,
+        if 'file_give' in request.files:
+            # 파일확장자를 추출하여 Path 정보를 만든다.
+            file = request.files["file_give"]
+            filename = secure_filename(file.filename)
+            extension = filename.split(".")[-1]
+            file_path = f"img_profile/{username}.{extension}"
+            # Path 정보에 이미지 파일을 저장한다.
+            file.save("./static/"+file_path)
+            # DB에 저장할 Dict 변수를 만든다.
+            new_doc = {
+                'img': file_path
+            }
+        # DB업데이트한다.
+        db.users.update_one({'username': payload['id']}, {'$set':new_doc})
+        return jsonify({"result": "success", 'msg': '프로필을 업데이트했습니다.'})
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
+
 # START : JOIN & LOGIN -----------------------------------------------------------
 @app.route('/login')
 def login():
@@ -125,10 +153,10 @@ def mypost(username):
     token_receive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        print(payload['id'])
         status = (username == payload["id"])  # 내 프로필이면 True, 다른 사람 프로필 페이지면 False
-
         user_info = db.users.find_one({"username": username}, {"_id": False})
-        return render_template('mypost.html', user_info=user_info, status=status)
+        return render_template('mypost.html', username=payload['id'], user_info=user_info, status=status)
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
 

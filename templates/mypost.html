@@ -128,12 +128,14 @@
 
         .user-info > img {
             width: 130px;
+            height: 130px;
             margin: auto;
             grid-column-start: 1;
             grid-column-end: 2;
             grid-row-start: 1;
             grid-row-end: 3;
             border-radius: 50%;
+            object-fit: cover;
         }
 
         .user-info > span {
@@ -147,42 +149,62 @@
             margin: 0 15px;
         }
 
-        .user-info > p > span{
+        .user-info > p > span {
             margin-right: 10px;
         }
+
+        .img-upload {
+            display: block;
+            position: absolute;
+            top: 110px;
+            left: 110px;
+            width: 25px;
+            height: 25px;
+            background-color: black;
+            border-radius: 50%;
+            padding-left: 3px;
+            padding-top: 3px;
+        }
+
+        .img-upload > img {
+            width: 19px;
+            height: 19px;
+        }
+
     </style>
     <script>
-            <!-- DOCUMENT READY 함수 -->
-            $(document).ready(function () {
-                get_posts('{{ user_info.username }}')
-            })
+        <!-- DOCUMENT READY 함수 -->
+        $(document).ready(function () {
+            get_posts('{{ user_info.username }}')
+            console.log(document.cookie)
+        })
 
-            // START : 서버에서 posts 받아와 표시
-            function get_posts(username) {
-                $("#get_posts").empty()
-                $.ajax({
-                    type: "GET",
-                    url: `/get_posts?username_give=${username}`,
-                    data: {},
-                    success: function (response) {
-                        if (response["result"] == "success") {
-                            let posts = response["posts"]
-                            let user_post_info = response["user_post_info"]
+        // START : 서버에서 posts 받아와 표시
+        function get_posts(username) {
+            $("#get_posts").empty()
+            $.ajax({
+                type: "GET",
+                url: `/get_posts?username_give=${username}`,
+                data: {},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        let posts = response["posts"]
+                        let user_post_info = response["user_post_info"]
 
-                            $('#count_posts').text(user_post_info['count_posts'])
-                            $('#count_likes').text(user_post_info['count_likes'])
-                            $('#count_comments').text(user_post_info['count_comments'])
+                        $('#count_posts').text(user_post_info['count_posts'])
+                        $('#count_likes').text(user_post_info['count_likes'])
+                        $('#count_comments').text(user_post_info['count_comments'])
 
-                            for (let i = 0; i < posts.length; i++) {
-                                let post = posts[i]
-                                let img = post['img']
-                                let postid = post['_id']
-                                let countlikes = post['count_likes']
-                                let countcomments = post['count_comments']
-                                // let time_post = new Date(post["date"])
-                                // let time_before = time2str(time_post)
-                                console.log(postid)
-                                let html_temp = `<div class="item">
+                        for (let i = 0; i < posts.length; i++) {
+                            let post = posts[i]
+                            let img = post['img']
+                            let postid = post['_id']
+                            let countlikes = post['count_likes']
+                            let countcomments = post['count_comments']
+                            // let time_post = new Date(post["date"])
+                            // let time_before = time2str(time_post)
+                            console.log(postid)
+                            let html_temp = `<div class="item">
                                                       <a href="post/${postid}">
                                                         <div class="thumb">
                                                             <img src="/static/img_post/${img}">
@@ -195,22 +217,91 @@
                                                             </div>
                                                         </div></a>
                                                  </div>`
-                                $("#post_list").append(html_temp)
-                            }
+                            $("#post_list").append(html_temp)
                         }
                     }
-                })
-            }
-            // END : 서버에서 posts 받아와서 표시
+                }
+            })
+        }
 
-            function logout(){
-                $.removeCookie('mytoken')
-                window.location.href="/"
+        // END : 서버에서 posts 받아와서 표시
 
-            }
-        </script>
+        function logout() {
+            $.removeCookie('mytoken')
+            window.location.href = "/"
+
+        }
+
+        function update_profile() {
+            // 파일을 폼 데이터에 넣는다.
+            let file = $('#input-img')[0].files[0]
+            let form_data = new FormData()
+            form_data.append("file_give", file)
+
+            // 폼 데이터를 API로 전달한다.
+            $.ajax({
+                type: "POST",
+                url: "/update_profile",
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        alert(response["msg"])
+                        window.location.reload()
+                    }
+                }
+            });
+        }
+    </script>
 </head>
 <body>
+<!-- START : 프로필 수정 MODAL -->
+<div class="modal" id="modal-edit">
+    <div class="modal-background" onclick='$("#modal-edit").removeClass("is-active")'></div>
+    <div class="modal-content">
+        <div class="box">
+            <article class="media">
+                <div class="media-content">
+                    <div class="field">
+                        <label class="label" for="input-pic">프로필 사진</label>
+                        <div class="control is-expanded">
+                            <div class="file has-name">
+                                <label class="file-label" style="width:100%">
+                                    <input id="input-img" class="file-input" type="file"
+                                           name="resume">
+                                    <span class="file-cta"><span class="file-icon"><i
+                                            class="fa fa-upload"></i></span>
+                                <span class="file-label">파일 선택</span>
+                            </span>
+                                    <span id="file-name" class="file-name"
+                                          style="width:100%;max-width:100%">{{ user_info.img }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="level is-mobile">
+                        <div class="level-left">
+                        </div>
+                        <div class="level-right">
+                            <div class="level-item">
+                                <a class="button is-sparta" onclick="update_profile()">업데이트</a>
+                            </div>
+                            <div class="level-item">
+                                <a class="button is-sparta is-outlined"
+                                   onclick='$("#modal-edit").removeClass("is-active")'>취소</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </article>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"
+            onclick='$("#modal-edit").removeClass("is-active")'></button>
+</div>
+<!--END : 프로필 수정 MODAL -->
 <div class="main_section">
     <!-- START : HEADER -->
     <div class="postList_header">
@@ -227,9 +318,9 @@
         <div class="mymenu">
             <a href="/newpost">write</a>
             <div class="dropdown">
-                <a>{{ user_info.username }}</a>
+                <a>{{ username }}</a>
                 <div class="dropdown-content">
-                    <a href="/mypost/{{ user_info.username }}">my post</a>
+                    <a href="/mypost/{{ username }}">my post</a>
                     <a href="#" onclick="logout()">logout</a>
                 </div>
             </div>
@@ -241,9 +332,9 @@
     <div class="user-info" id="user_info">
 
         {% if user_info.img == "" %}
-        <img src="{{ url_for('static', filename='img_profile/default.png') }}">
+            <img src="{{ url_for('static', filename='img_profile/default.png') }}">
         {% else %}
-        <img src="{{ url_for('static', filename=user_info.img) }}">
+            <img src="{{ url_for('static', filename=user_info.img) }}">
         {% endif %}
 
         <span class="name">{{ user_info.username }}</span>
@@ -252,8 +343,16 @@
             <label>like</label> <span id="count_likes"></span>
             <label>comment</label> <span id="count_comments"></span>
         </p>
+        {% if status %}
+            <a href="#" onclick="$('#modal-edit').addClass('is-active')">
+                <div class="img-upload"><img
+                        src="https://cdn4.iconfinder.com/data/icons/twitter-29/512/151_Twitter_Image_Picture_Camera-256.png">
+                </div>
+            </a>
+        {% endif %}
     </div>
     <!-- END : USER INFO -->
+
     <!-- START : POST LIST -->
     <div class="container" id="post_list">
     </div>

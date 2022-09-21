@@ -78,16 +78,19 @@ a {
     display: none;
     position: absolute;
     background-color: transparent;
-    min-width: 100px;
+    min-width: 65px;
     box-shadow: 0px 0px 0px 0px rgba(0,0,0,0);
     z-index: 1;
 }
 
 .dropdown-content a {
-    color: black;
-    text-decoration: none;
     display: block;
     margin-top: 5px;
+
+    background-color: rgba(255, 255, 255, 0.5);
+
+    text-decoration: none;
+    color: black;
 }
 
 .dropdown:hover .dropdown-content {display: block;}
