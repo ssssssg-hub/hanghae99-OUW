@@ -53,11 +53,17 @@
             .f-bold{
                 font-weight: bold;
             }
+            .section-detail{
+                margin: 15px auto;
+                width: 80%;
+            }
+            .fa{
+                color: red;
+            }
         </style>
 
         <script>
             $(document).ready(function () {
-                console.log('일단 들어왔다.')
             })
 
             function leave_comment() {
@@ -78,8 +84,50 @@
                      }
                 })
             }
-        </script>
+            {##}
+            {#        <nav class="level is-mobile">#}
+            {#<div class="level-left">#}
+            {##}
+            {#    <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like()">#}
+            {#        <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span>#}
+            {#    </a>#}
 
+            function toggle_like(){
+                let post_id= '{{ post['_id'] }}'
+                let $n_like = $('#n_like')
+                let $i_like = $('.fa')
+                console.log($i_like.hasClass('fa-heart'));
+                if ($i_like.hasClass("fa-heart")) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/update_like",
+                        data: {
+                            post_id_give: post_id,
+                            action_give: "unlike"
+                        },
+                        success: function (response) {
+                            console.log("unlike")
+                            $i_like.addClass("fa-heart-o").removeClass("fa-heart")
+                            $n_like.text(response["count"])
+                        }
+                    })
+                }
+                else
+                   $.ajax({
+                       type: "POST",
+                       url: "/update_like",
+                       data: {
+                           post_id_give: post_id,
+                           action_give: "like"
+                       },
+                       success: function (response) {
+                           console.log("like")
+                           $i_like.addClass("fa-heart").removeClass("fa-heart-o")
+                           $n_like.text(response["count"])
+                       }
+                   })
+            }
+        </script>
     </head>
 
     <body>
@@ -93,17 +141,27 @@
             <span><a href="/">back</a></span>
             <!--                home으로 넘어감-->
         </div>
+    <div class="section-detail">
         <div class="box">
-            <figure class="image is-7600x7600">
-                <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+            <figure class="image is-760x760">
+                <img src="/static/img_post/{{ post['img'] }}" alt="Image">
             </figure>
         </div>
         <nav class="level is-mobile">
             <div class="level-left">
-                <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like('', 'heart')">
-                    <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span></a>
-                <span class="like-num">{{ count_likes }}</span>
-                {{ alreadylike }}
+
+                <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like()">
+                    {% if alreadylike %}
+                        <span class="icon is-small">
+                        <i class="fa fa-heart" aria-hidden="true" id="id_heart"></i>
+                    </span>
+                    {% else %}
+                        <span class="icon is-small">
+                        <i class="fa fa-heart-o" aria-hidden="true" id="id_heart"></i>
+                    </span>
+                    {% endif %}
+                </a>
+                <span class="like-num" id="n_like">{{ count_likes }}</span>
             </div>
         </nav>
         <div class="control">
@@ -148,6 +206,7 @@
             <div class="comments-blank"></div>
             </div>
         <!-- 댓글 기능 끝 -->
+        </div>
     </div>
     </div>
     </body>

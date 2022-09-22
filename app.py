@@ -17,10 +17,11 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
 SECRET_KEY = 'PROJECTOUW'
 
-# AWS 업로드해야 localhost로 작동한다.
-client = MongoClient('localhost', 27017, username="test", password="test")
-# client = MongoClient('13.209.15.57', 27017, username="test", password="test")
+# AWS 업로드 시 경로 'localhost' 로 바꾸기!
+# client = MongoClient('localhost', 27017, username="test", password="test")
+client = MongoClient('13.209.15.57', 27017, username="test", password="test")
 db = client.project_ouw
+
 
 @app.route('/')
 def home():
@@ -28,18 +29,18 @@ def home():
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         return redirect(url_for("postlist", username=payload["id"]))
-        # return render_template('postlist.html', user_info=user_info)
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
 
 @app.route("/postlist")
 def postlist():
     # Cookie로부터 token을 받아온다.
     token_receive = request.cookies.get('mytoken')
     try:
-        # token 복호화 후 DB로부터 user 정보를 가져온다.
+        # token 복호화하여  DB로부터 user 정보를 가져온다.
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         # user_info = db.users.find_one({"username": payload["id"]})
         print(payload["id"])
@@ -116,8 +117,8 @@ def sign_in():
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
         return jsonify({'result': 'success', 'token': token})
     # 찾지 못하면
@@ -299,7 +300,33 @@ def write_comment():
     except jwt.exceptions.DecodeError:
         # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
         return redirect(url_for("login", msg="로그인 해주세요."))
-#
+
+@app.route("/update_like", methods=['POST'])
+def update_like():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        user_info = db.users.find_one({"username": payload["id"]})
+        post_id_receive = request.form["post_id_give"]
+        action_receive = request.form["action_give"]
+
+        doc = {
+            "postid": post_id_receive,
+            "user": user_info["username"],
+        }
+        if action_receive == "like":
+            db.likes.insert_one(doc)
+        else:
+            db.likes.delete_one(doc)
+        count = db.likes.count_documents({"postid": post_id_receive})
+        print(count)
+        return jsonify({"result": "success", 'msg': 'updated', "count": count})
+
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
+
+
 # @app.route("/get_comments", methods=['GET'])
 # def get_comments():
 #     # 전달받은 POST ID 저장
