@@ -87,8 +87,13 @@
                 map.setCenter(new naver.maps.LatLng(lat, lng))
             }
 
+
             function onGeoError() {
-                alert("I can't find you.");
+                // alert("I can't find you.");
+                let marker = new naver.maps.Marker({
+                    position: new naver.maps.LatLng(37.4981125, 127.0379399),
+                    map: map
+                });
             }
 
             navigator.geolocation.getCurrentPosition(onGeoOkay, onGeoError);

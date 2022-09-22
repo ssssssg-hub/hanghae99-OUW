@@ -18,8 +18,8 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 SECRET_KEY = 'PROJECTOUW'
 
 # AWS 업로드해야 localhost로 작동한다.
-# client = MongoClient('localhost', 27017, username="test", password="test")
-client = MongoClient('13.209.15.57', 27017, username="test", password="test")
+client = MongoClient('localhost', 27017, username="test", password="test")
+# client = MongoClient('13.209.15.57', 27017, username="test", password="test")
 db = client.project_ouw
 
 @app.route('/')
@@ -116,8 +116,8 @@ def sign_in():
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
         return jsonify({'result': 'success', 'token': token})
     # 찾지 못하면
@@ -132,7 +132,7 @@ def sign_up():
     doc = {
         "username": username_receive,                               # 아이디
         "password": password_hash,                                  # 비밀번호
-        "profile_pic": "",                                          # 프로필 사진 파일 이름
+        "img": "",                                          # 프로필 사진 파일 이름
     }
     db.users.insert_one(doc)
     return jsonify({'result': 'success'})

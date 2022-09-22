@@ -28,6 +28,10 @@
 
 
         <style>
+            .no-hover:hover{
+                text-decoration: none;
+                color: #181818;
+            }
 
             .postList_header > span{
                 position: absolute;
@@ -105,7 +109,7 @@
         <div class="control">
             <div class="content">
                 <p>
-                    <strong>{{ post['user'] }}</strong>
+                    <strong><a class="no-hover" href="/mypost/{{ post['user'] }}"><span>{{ post['user'] }}</span></a></strong>
                     <small>{{ post['date'] }}</small>
                     <br>
                 </p>
@@ -129,7 +133,7 @@
                         <div class="card-content">
                             <div class="media">
                                 <div class="media-left f-bold">
-                                    <span>{{ comment['user'] }}</span>
+                                    <a class="no-hover" href="/mypost/{{ comment['user'] }}"><span>{{ comment['user'] }}</span></a>
                                 </div>
                                 <!-- comment 시작-->
                                 <div class="content">
