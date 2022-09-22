@@ -34,6 +34,21 @@
                 right: 15px;
                 bottom: 5px;
             }
+
+            .comment_write{
+                display: flex;
+            }
+            .comments-section{
+                margin-bottom: 50px;
+                font-size: 14px;
+            }
+
+            .comments-blank{
+                height: 50px;
+            }
+            .f-bold{
+                font-weight: bold;
+            }
         </style>
 
         <script>
@@ -41,120 +56,95 @@
                 console.log('일단 들어왔다.')
             })
 
-            // function comment(){
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "/detail/comment",
-            //         data: {
-            //             user_give: user_receive,
-            //             postid_give: postid_receive,
-            //             comment_give: comment_receive
-            //         },
-            //         success: function (response) {
-            //             alert(response["msg"])
-            //         }
-            //     });
-            // }
+            function leave_comment() {
+                console.log('함수 leave_comment 실행 얍')
+                let postid= '{{ post['_id'] }}'
+                let comment = $('#id_comment').val()
 
-            //
-            // function comment() {
-            //     let comment = $("#textarea-post").val()
-            //     let user =
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "/posting",
-            //         data: {
-            //             comment_give: comment,
-            //             date_give: today
-            //         },
-            //         success: function (response) {
-            //             $("#modal-post").removeClass("is-active") //모달을 닫는다
-            //             window.location.reload()
-            //         }
-            //     })
-            // }
+                $.ajax({
+                    type: "POST",
+                    url: "/write_comment",
+                    data: {
+                        postid_give: postid,
+                        comment_give: comment
+                    },
+                     success: function (response) {
+                         alert(response['msg'])
+                         window.location.reload()
+                     }
+                })
+            }
         </script>
 
     </head>
 
     <body>
-        <div class="main_section">
-            <div class="postList_header">
-                <div class="logo">
-                    <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
-                         alt="logo">OUW
-                    <span>오늘의 운동</span>
-                </div>
-                <span><a href="/">back</a></span>
-                <!--                home으로 넘어감-->
+    <div class="main_section">
+        <div class="postList_header">
+            <div class="logo">
+                <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
+                     alt="logo">OUW
+                <span>오늘의 운동</span>
             </div>
-            <div class="box">
-                <figure class="image is-7600x7600">
-                    <!--                        <img src="{{ post['image'] }}" class="img-fluid">-->
-                    <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
-                </figure>
-            </div>
-            <nav class="level is-mobile">
-                <div class="level-left">
-                    <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like('', 'heart')">
-                        <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span>&nbsp;<span class="like-num">2.7k</span>
-                    </a>
-                </div>
-            </nav>
-            <div class="control">
-                <div class="content">
-                    <p>
-                        <strong>{{ post['user'] }}</strong>
-                        <small>{{ post['date'] }}</small>
-                        <br>
-                    </p>
-                </div>
-                <div>
-                    {{ post['content'] }}
-                </div>
-                <div class="nomal">
-
-                </div>
-
-                <div class="card-body">
-
-
-                </div>
-            </div>
-
-
-
-<!--        </div>-->
-            <!--댓글-->
-            <!--                <div class="field is-grouped">-->
-            <!--                    <div class="control is-expanded">-->
-            <!--                        <input class="input" type="text" placeholder="Text input">-->
-            <!--                    </div>-->
-            <!--                    <div class="control">-->
-            <!--                        <button class="button is-primary" onclick="post()">Button</button>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--            <div class="card">-->
-            <!--                <div class="card-header">댓글 리스트</div>-->
-            <!--                    <ul id="reply&#45;&#45;box" class="list-group">-->
-            <!--                        <li id="reply&#45;&#45;1" class="list-group-item d-flex justify-content-between">-->
-            <!--                            <div>내용</div>-->
-            <!--                            <div class="d-flex">-->
-            <!--                                <button type="button" class="btn btn-outline-danger">삭제</button>-->
-            <!--                            </div>-->
-            <!--                        </li>-->
-            <!--                    </ul>-->
-            <!--                </div>-->
-            <!--            </div>-->
-            <!-- 댓글 본문 입력 -->
-            <!--            <div class="form-floating">-->
-            <!--                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>-->
-            <!--                <label for="floatingTextarea">댓글을 입력하세요</label>-->
-            <!--                <button type="button" class="btn btn-outline-primary btn-sm" id="comment-create-btn">댓글 작성</button>-->
-            <!--            </div>-->
-            <!-- 전송 버튼 -->
-
-            <!--        </div>-->
+            <span><a href="/">back</a></span>
+            <!--                home으로 넘어감-->
         </div>
+        <div class="box">
+            <figure class="image is-7600x7600">
+                <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+            </figure>
+        </div>
+        <nav class="level is-mobile">
+            <div class="level-left">
+                <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like('', 'heart')">
+                    <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span></a>
+                <span class="like-num">{{ count_likes }}</span>
+                {{ alreadylike }}
+            </div>
+        </nav>
+        <div class="control">
+            <div class="content">
+                <p>
+                    <strong>{{ post['user'] }}</strong>
+                    <small>{{ post['date'] }}</small>
+                    <br>
+                </p>
+            </div>
+            <div>
+                {{ post['content'] }}
+            </div>
+            <!-- 댓글 출력 기능 시작 -->
+            <div class="comments-section">
+                <div class="comments-blank"></div>
+                <!-- 댓글 쓰기 시작 -->
+                <div class="comment_write">
+                    <input class="input" type="text" placeholder="plz leave comment" id="id_comment">
+                    <button class="button" onclick="leave_comment()">thanks💛</button>
+                </div>
+                <!-- 댓글 쓰기 끝 -->
+                <!-- 댓글 리스트 시작 -->
+                    <div class="comments_list">
+                    {% for comment in comments %}
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-left f-bold">
+                                    <span>{{ comment['user'] }}</span>
+                                </div>
+                                <!-- comment 시작-->
+                                <div class="content">
+                                    {{ comment['content'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- 댓글 리스트 출력 끝-->
+            <div class="comments-blank"></div>
+            </div>
+        <!-- 댓글 기능 끝 -->
+    </div>
+    </div>
     </body>
 </html>

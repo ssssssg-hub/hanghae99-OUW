@@ -176,7 +176,6 @@ def get_posts():
             post["_id"] = str(post["_id"])
             post["count_likes"] = db.likes.count_documents({"postid": post["_id"]})
             post["count_comments"] = db.comments.count_documents({"postid": post["_id"]})
-            print(post['date'])
 
             if not isTotal:
                 user_post_info['count_posts'] += 1
@@ -254,15 +253,61 @@ def save_newpost():
         # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
         return redirect(url_for("login", msg="로그인 해주세요."))
 
-@app.route("/detail/<postid>", methods=['GET'])
+@app.route("/detail/<postid>")
 def detail_post(postid):
     print(postid)
     token_receive = request.cookies.get('mytoken')
     payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+    myid = payload["id"]
 
     post = db.posts.find_one({"_id": ObjectId(postid)})
     print(post)
-    return render_template('detail.html', username=payload["id"], post=post)
+
+    likes = list(db.likes.find({"postid": postid }))
+    print(likes)
+    count_likes = 0
+    alreadylike = False
+    for like in likes:
+        count_likes += 1
+
+        if like['user'] == myid:
+            alreadylike = True
+
+    comments = list(db.comments.find({"postid": postid}))
+    return render_template('detail.html', username=payload["id"], post=post, comments=comments, count_likes=count_likes, alreadylike=alreadylike)
+
+
+@app.route("/write_comment", methods=['POST'])
+def write_comment():
+    token_receive = request.cookies.get('mytoken')
+    try:
+        # token 복호화 후 DB로부터 user 정보를 가져온다.
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        comment_receive = request.form['comment_give']
+        postid_receive = request.form['postid_give']
+
+        doc = {
+            'user': payload['id'],
+            'postid': postid_receive,
+            'content': comment_receive
+        }
+        db.comments.insert_one(doc)
+        return jsonify({'msg': '저장 완료!'})
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        # token 복호화 오류 즉, login 상태가 아닌 경우 user_info 공란으로 돌려준다.
+        return redirect(url_for("login", msg="로그인 해주세요."))
+#
+# @app.route("/get_comments", methods=['GET'])
+# def get_comments():
+#     # 전달받은 POST ID 저장
+#     postid_receive = request.args.get("postid_give")
+#     # DB검색
+#     comments = list(db.comments.find({"postid": postid_receive}))
+#     print(comments)
+#     return jsonify({'comments': comments, 'postid': postid_receive})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
