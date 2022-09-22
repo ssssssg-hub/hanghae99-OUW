@@ -13,6 +13,10 @@
             src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=6ck56pnwef"></script>
     <script src=" https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap');
     </style>
@@ -155,13 +159,18 @@
             });
         }
 
+        function logout() {
+            console.log('삭제?')
+            $.removeCookie("mytoken", {path: "/"});
+            window.location.href = "/";
+        }
     </script>
 </head>
 
 <body>
 <div class="main_section">
 
-            <!-- START : HEADER -->
+<!-- START : HEADER -->
             <div class="postList_header">
                 <!-- START : LOGO -->
                 <a href="/">

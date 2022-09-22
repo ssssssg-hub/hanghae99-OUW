@@ -26,7 +26,6 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 
-
         <style>
             .no-hover:hover{
                 text-decoration: none;
@@ -63,9 +62,6 @@
         </style>
 
         <script>
-            $(document).ready(function () {
-            })
-
             function leave_comment() {
                 console.log('함수 leave_comment 실행 얍')
                 let postid= '{{ post['_id'] }}'
@@ -84,13 +80,6 @@
                      }
                 })
             }
-            {##}
-            {#        <nav class="level is-mobile">#}
-            {#<div class="level-left">#}
-            {##}
-            {#    <a class="level-item is-sparta" aria-label="heart" onclick="toggle_like()">#}
-            {#        <span class="icon is-small"><i class="fa fa-heart" aria-hidden="true"></i></span>#}
-            {#    </a>#}
 
             function toggle_like(){
                 let post_id= '{{ post['_id'] }}'
@@ -127,20 +116,50 @@
                        }
                    })
             }
+
+            function logout() {
+                console.log('삭제?')
+                $.removeCookie("mytoken", {path: "/"});
+
+                window.location.href = "/";
+            }
         </script>
     </head>
 
     <body>
     <div class="main_section">
-        <div class="postList_header">
+
+    <!-- START : HEADER -->
+    <div class="postList_header">
+        <!-- START : LOGO -->
+        <a href="/">
             <div class="logo">
                 <img src="https://cdn1.iconfinder.com/data/icons/covid-19-15/512/Health-healthy-heart-strength-strong-256.png"
                      alt="logo">OUW
-                <span>오늘의 운동</span>
+                <span>오늘의 운동 완료</span>
             </div>
-            <span><a href="/">back</a></span>
-            <!--                home으로 넘어감-->
+        </a>
+        <!-- END : LOGO -->
+        <!-- START : 우측 메뉴 -->
+        <div class="mymenu">
+            <!-- 로그인 여부에 따라 다른 메뉴 출력-->
+            {% if username == '' %}
+                <a href="/login">login</a>
+            {% else %}
+                <a href="/newpost">write</a>
+                <div class="dropdown">
+                    <a>{{ username }}</a>
+                    <div class="dropdown-content">
+                        <a href="/mypost/{{ username }}">my post</a>
+                        <a href="#" onclick="logout()">logout</a>
+                    </div>
+                </div>
+            {% endif %}
         </div>
+        <!-- END : 우측 메뉴 -->
+    </div>
+    <!-- END : HEADER -->
+
     <div class="section-detail">
         <div class="box">
             <figure class="image is-760x760">

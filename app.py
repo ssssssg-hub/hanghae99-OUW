@@ -18,8 +18,8 @@ app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 SECRET_KEY = 'PROJECTOUW'
 
 # AWS 업로드 시 경로 'localhost' 로 바꾸기!
-# client = MongoClient('localhost', 27017, username="test", password="test")
-client = MongoClient('13.209.15.57', 27017, username="test", password="test")
+client = MongoClient('localhost', 27017, username="test", password="test")
+# client = MongoClient('13.209.15.57', 27017, username="test", password="test")
 db = client.project_ouw
 
 
@@ -117,8 +117,8 @@ def sign_in():
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)  # 로그인 24시간 유지
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        # token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
 
         return jsonify({'result': 'success', 'token': token})
     # 찾지 못하면
